@@ -71,7 +71,7 @@ print(f"FID: {fid_val:.3f}")
     - Test: Entire test set (from the above)
 
 ## Evaluating overfitting
-To only the degree of overfitting, we recommend looking at the **FLD generalization gap** (i.e. the difference between train and test FLD). The more this value is negative, the more your model is overfitting. This can be done as follows:
+To only evaluate the degree of overfitting, we recommend looking at the **FLD generalization gap** (i.e. the difference between train and test FLD). The more this value is negative, the more your model is overfitting. This can be done as follows:
 ```python
 from fld.metrics.FLD import FLD
 train_fld = FLD(eval_feat="gap").compute_metric(train_feat, test_feat, gen_feat)

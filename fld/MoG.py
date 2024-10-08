@@ -113,17 +113,14 @@ class MoG:
         optim = torch.optim.Adam([self.log_sigmas, self.origin_log_sigma], lr=self.lr)
         x = shuffle(x)
 
-        # Don't need to cache dists if
+        # Computing full set of distances will OOM for large x (otherwise compute by batches)
         cached_dists = None
         if len(x) < 250_000:
             cached_dists = self.dists(x)
-            min_dists = cached_dists.min(dim=0).values
-        else:
-            min_dists = cached_dists.min(x[:250_000]).values
 
-        # Init at optimal LL relative to the nearest point
-        min_dists = cached_dists.min(dim=0).values
-        self.log_sigmas.data = ((min_dists + 1e-3) / x.shape[1]).log()
+            # Init at optimal LL relative to the nearest point
+            min_dists = cached_dists.min(dim=0).values
+            self.log_sigmas.data = ((min_dists + 1e-3) / x.shape[1]).log()
 
         for epoch in tqdm(range(self.num_epochs), leave=False):
             epoch_losses = []
@@ -158,7 +155,7 @@ class MoG:
             mean_loss = sum(epoch_losses) / len(epoch_losses)
             losses.append(mean_loss)
 
-            if epoch > 5:
+            if epoch > 10:
                 max_diff = max([abs(mean_loss - losses[-j]) for j in range(1, 6)])
                 if max_diff < 5e-4:
                     break
